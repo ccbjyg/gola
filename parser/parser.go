@@ -3,6 +3,7 @@ package parser
 import (
 	"errors"
 	"fmt"
+
 	"github.com/Cc-BJYG/gola/operation"
 	"github.com/Cc-BJYG/gola/token"
 )
@@ -53,24 +54,18 @@ func (p *parser) expr() (Node, error) {
 //+ - 属于二元操作符
 func (p *parser) nExpr() (Node, error) {
 	// nExpr -- hExpr (( PLUS | MINUS ) hExpr ) *
-	return p.binaryOpNode(p.hExpr, map[token.Type]bool{
-		token.PLUS:  true,
-		token.MINUS: true,
-	})
+	return p.binaryOpNode(p.hExpr, nLevel)
 }
 
 // * ÷
 func (p *parser) hExpr() (Node, error) {
 	// hExpr -- vhExpr (( PLUS | MINUS ) vhExpr ) *
-	return p.binaryOpNode(p.vhExpr, map[token.Type]bool{
-		token.MUL: true,
-		token.DIV: true,
-	})
+	return p.binaryOpNode(p.vhExpr, hLevel)
 }
+
+// ^
 func (p *parser) vhExpr() (Node, error) {
-	return p.binaryOpNode(p.atom, map[token.Type]bool{
-		token.CARET: true,
-	})
+	return p.binaryOpNode(p.atom, vhLevel)
 }
 
 //atom 数字源，同时用于构成闭环。
@@ -79,11 +74,12 @@ func (p *parser) atom() (Node, error) {
 	t := p.getCurrentToken()
 
 	if t != nil && t.GetType() == token.NUM {
-		//返回数字节点
+		// NUM 返回数字节点
 		// num, err := operation.NewNum(t.GetValue())
 		// return NumberNode(num), err
 		return NumberNode(t.GetValue()), nil
 	} else if t != nil && t.GetType() == token.LPAREN {
+		// ( nExpr ) 括号
 		// expr, err := p.nExpr()
 		node, err := p.expr()
 		if err != nil {
@@ -96,6 +92,13 @@ func (p *parser) atom() (Node, error) {
 		}
 
 		return node, nil
+	} else if op, ok := operation.IsUnaryOp(t); ok {
+		//支持 +++1 ---1
+		node, err := p.atom()
+		if err != nil {
+			return node, err
+		}
+		return UnaryOpNode(op, node), nil
 	} else if op, ok := operation.IsBuildInOp(t); ok {
 		//如果是内置函数
 		t = p.getCurrentToken()

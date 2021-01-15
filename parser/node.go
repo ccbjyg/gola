@@ -2,9 +2,10 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/Cc-BJYG/gola/operation"
 	"github.com/Cc-BJYG/gola/token"
-	"strconv"
 )
 
 //Node 节点
@@ -39,11 +40,33 @@ func NumberNode(num token.Value) Node {
 	}
 }
 
-// 最后好像没有用额
-// //UnaryOpNode 创建一元操作符
-// func UnaryOpNode(op operation.Operation, node Node) Node {
-// 	return nil
-// }
+//-----------------------------------------------------------------------------------------------------------
+type unaryOpNode struct {
+	op operation.Operation
+
+	node Node
+}
+
+func (n unaryOpNode) Debug() string {
+	return "unaryOpNode-> " + "node: " + n.node.Debug()
+}
+func (n unaryOpNode) Gola() (float64, error) {
+	r, err := n.node.Gola()
+	if err != nil {
+		return 0, ErrGola
+	}
+
+	return n.op(r)
+}
+
+//UnaryOpNode 创建一元操作符
+func UnaryOpNode(op operation.Operation, node Node) Node {
+	return unaryOpNode{
+		op:   op,
+		node: node,
+	}
+}
+
 //-----------------------------------------------------------------------------------------------------------
 type binaryOpNode struct {
 	op operation.Operation

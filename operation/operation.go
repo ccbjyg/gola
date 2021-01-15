@@ -1,8 +1,9 @@
 package operation
 
 import (
-	"github.com/Cc-BJYG/gola/token"
 	"math"
+
+	"github.com/Cc-BJYG/gola/token"
 )
 
 var operationM = map[token.Type]Operation{
@@ -43,7 +44,7 @@ func IsBinaryOp(t token.Token) (Operation, bool) {
 	return op, exist
 }
 
-//IsBuildInOp 是否是一元操作符
+//IsBuildInOp 是否内建函数
 func IsBuildInOp(t token.Token) (Operation, bool) {
 	if t == nil {
 		return nil, false
@@ -52,8 +53,11 @@ func IsBuildInOp(t token.Token) (Operation, bool) {
 	return op, exist
 }
 
-//UnaryOperation
-var unaryOperationM = map[token.Type]Operation{}
+//UnaryOperation 一元操作符 -1
+var unaryOperationM = map[token.Type]Operation{
+	token.PLUS:  add, //+
+	token.MINUS: sub, //-
+}
 
 //BinaryOperation
 var binaryOperationM = map[token.Type]Operation{
@@ -80,38 +84,24 @@ var buildInOperationM = map[token.Type]Operation{
 //Operation 操作符
 type Operation func(...float64) (float64, error)
 
-// unary operation
-func ln(nums ...float64) (float64, error) {
-	if len(nums) != 1 {
-		return 0, ErrInput
-	}
-	return math.Logb(nums[0]), nil
-}
-func lg(nums ...float64) (float64, error) {
-	if len(nums) != 1 {
-		return 0, ErrInput
-	}
-	return math.Log10(nums[0]), nil
-}
-func floor(nums ...float64) (float64, error) {
-	if len(nums) != 1 {
-		return 0, ErrInput
-	}
-	return math.Floor(nums[0]), nil
-}
-
-//binary operation
+//base operation
 func add(nums ...float64) (float64, error) {
-	if len(nums) != 2 {
-		return 0, ErrInput
+	if len(nums) == 1 {
+		return nums[0], nil
 	}
-	return nums[0] + nums[1], nil
+	if len(nums) == 2 {
+		return nums[0] + nums[1], nil
+	}
+	return 0, ErrInput
 }
 func sub(nums ...float64) (float64, error) {
-	if len(nums) != 2 {
-		return 0, ErrInput
+	if len(nums) == 1 {
+		return 0 - nums[0], nil
 	}
-	return nums[0] - nums[1], nil
+	if len(nums) == 2 {
+		return nums[0] - nums[1], nil
+	}
+	return 0, ErrInput
 }
 func multiplication(nums ...float64) (float64, error) {
 	if len(nums) != 2 {
@@ -160,4 +150,22 @@ func min(nums ...float64) (float64, error) {
 		}
 	}
 	return min, nil
+}
+func ln(nums ...float64) (float64, error) {
+	if len(nums) != 1 {
+		return 0, ErrInput
+	}
+	return math.Logb(nums[0]), nil
+}
+func lg(nums ...float64) (float64, error) {
+	if len(nums) != 1 {
+		return 0, ErrInput
+	}
+	return math.Log10(nums[0]), nil
+}
+func floor(nums ...float64) (float64, error) {
+	if len(nums) != 1 {
+		return 0, ErrInput
+	}
+	return math.Floor(nums[0]), nil
 }
