@@ -3,16 +3,18 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/Cc-BJYG/gola/parser"
 	"github.com/Cc-BJYG/gola/spliter"
 	"github.com/Cc-BJYG/gola/token"
-	"os"
-	"strings"
 )
 
 func main() {
 	Parse()
 
+	//运行文件，未来需要加更多的调试信息，将这部分内容精细化。
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print("-> ")
@@ -27,7 +29,7 @@ func main() {
 			continue
 		}
 
-		//分词
+		//分词--------------------------------------------------------------------------------------------------------
 		s, err := spliter.CreateSpliter(input)
 		if err != nil {
 			fmt.Println(err)
@@ -38,7 +40,17 @@ func main() {
 			fmt.Println(err)
 			continue
 		}
-		//解析
+		if *debug {
+			fmt.Println("tokens debug:---")
+			for _, t := range tokens {
+				name := token.GetTypeName(t.GetType())
+				v := string(t.GetValue())
+				fmt.Printf("%s %s # ", name, string(v))
+			}
+			fmt.Println()
+		}
+
+		//解析--------------------------------------------------------------------------------------------------------
 		p, err := parser.CreateParser(tokens)
 		if err != nil {
 			fmt.Println(err)
@@ -49,25 +61,19 @@ func main() {
 			fmt.Println(err)
 			continue
 		}
-		//计算
+		if *debug {
+			//解析器debug
+		}
+
+		//计算--------------------------------------------------------------------------------------------------------
+		if node == nil {
+			continue
+		}
 		result, err := node.Gola()
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 		fmt.Println("result : ", result)
-
-		if *debug {
-			fmt.Println("tokens debug:---")
-			for _, t := range tokens {
-				name := token.GetTypeName(t.GetType())
-				v := string(t.GetValue())
-				fmt.Printf("%s %s # ", name, string(v))
-			}
-			fmt.Println()
-
-			fmt.Println("node debug:---")
-			fmt.Println(node.Debug())
-		}
 	}
 }

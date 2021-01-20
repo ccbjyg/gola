@@ -23,7 +23,35 @@ type num struct {
 
 //NewNum 创建数字
 func NewNum(s []byte) (Num, error) {
-	return nil, nil
+	num := num{
+		integerPart:    make([]byte, 0),
+		dot:            false,
+		fractionalPart: make([]byte, 0),
+	}
+	var numAppend = func(b byte) {
+		num.integerPart = append([]byte{b}, num.integerPart...)
+	}
+	for i := 0; i < len(s); i++ {
+		if s[i] <= '0' && s[i] >= '9' && s[i] != '.' {
+			return num, ErrInput
+		}
+		if num.dot {
+			if s[i] == '.' {
+				return num, ErrMuchDot
+			}
+			numAppend(s[i])
+		} else {
+			if s[i] == '.' {
+				num.dot = true
+				numAppend = func(b byte) {
+					num.fractionalPart = append(num.fractionalPart, b)
+				}
+				continue
+			}
+			numAppend(s[i])
+		}
+	}
+	return num, nil
 }
 
 //String 输出为字符串
@@ -31,7 +59,7 @@ func (n num) String() string {
 	if n.dot {
 		s := make([]byte, 0, len(n.integerPart)+len(n.fractionalPart)+1)
 
-		for i := len(n.integerPart) - 1; i >= 0; i++ {
+		for i := len(n.integerPart) - 1; i >= 0; i-- {
 			s = append(s, n.integerPart[i])
 		}
 

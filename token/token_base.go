@@ -41,6 +41,9 @@ const (
 	//CARET 乘方 ^
 	CARET
 
+	//ASSIGN =
+	ASSIGN
+
 	//LPAREN (
 	LPAREN
 
@@ -107,6 +110,9 @@ var tokens = [...]string{
 	DIV: "/",
 	//CARET 乘方 ^
 	CARET: "^",
+
+	//ASSIGN =
+	ASSIGN: "=",
 
 	//LPAREN (
 	LPAREN: "(",
@@ -187,8 +193,9 @@ func getSymbolType(bs ...byte) Type {
 var keyWords = map[string]Type{}
 
 func getKeywordsType(bs ...byte) Type {
+	//匹配到关键字则是关键字，否则作为 变量实体返回
 	if tt, exist := keyWords[string(bs)]; exist {
 		return tt
 	}
-	return UNKNOWN
+	return ENTITY
 }

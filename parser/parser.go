@@ -2,7 +2,6 @@ package parser
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/Cc-BJYG/gola/operation"
 	"github.com/Cc-BJYG/gola/token"
@@ -47,7 +46,6 @@ func (p *parser) getCurrentToken() token.Token {
 
 func (p *parser) expr() (Node, error) {
 	// expr -- nExpr
-
 	return p.nExpr()
 }
 
@@ -87,11 +85,36 @@ func (p *parser) atom() (Node, error) {
 		}
 
 		t = p.getCurrentToken() //这里在迭代后需要再更新一下
-		if t != nil && t.GetType() != token.RPAREN {
+		if t == nil || t.GetType() != token.RPAREN {
 			return node, errors.New("miss ')' ")
 		}
 
 		return node, nil
+	} else if t != nil && t.GetType() == token.ENTITY {
+		//支持变量
+		entityName := string(t.GetValue()) // 获取变量名
+
+		node, _ := getGlobalEntity(entityName)
+		if node != nil {
+			//说明已经注册过了
+			return node, nil
+		}
+		//否则通过 = 来判断进行注册
+
+		//判断是否为 =
+		t = p.getCurrentToken()
+		if t == nil || t.GetType() != token.ASSIGN {
+			return nil, errors.New(entityName + " miss = symbol")
+		}
+
+		//解析 node
+		node, err := p.nExpr()
+		if err != nil {
+			return nil, err
+		}
+
+		//注册全局 node
+		return nil, registerGloblEntity(string(entityName), node)
 	} else if op, ok := operation.IsUnaryOp(t); ok {
 		//支持 +++1 ---1
 		node, err := p.atom()
@@ -132,7 +155,7 @@ func (p *parser) atom() (Node, error) {
 	} else {
 		//都没开始就结束了
 		if t != nil {
-			fmt.Println(token.GetTypeName(t.GetType()), t.GetValue())
+			return nil, errors.New("error token: " + token.GetTypeName(t.GetType()) + " " + string(t.GetValue()))
 		}
 		return nil, errors.New("miss start symbol num ,keywords, ( and so on")
 	}

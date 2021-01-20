@@ -147,7 +147,7 @@ func (s *spliter) makeString() (token.Token, error) {
 	for s.pos < len(s.source) {
 		b := s.source[s.pos]
 
-		//运行 a1 这种定义方式，不允许 1a
+		//允许 a1 这种定义方式，不允许 1a
 		if isLetter(b) || isNums(b) {
 			s.pos++
 			str = append(str, b)

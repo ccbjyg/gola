@@ -12,7 +12,7 @@ token type | token value
 ---- | ---
 NUM | **1~9** **.** 
 SYMBOL | **+ - * /** ...... 
-LETTER | a~z  &&  A~Z
+LETTER | a\~z  &&  A\~Z
 
 ### 语法分析器
 
@@ -36,9 +36,15 @@ vh_expr --atom ( **CARET** atom ) *
 
 atom -- **NUM**
 
+​         -- ( **PLUS** | **MINUS** )* atom
+
 ​         -- **LPAREN**  expr  **RPAREN**
 
 ​         -- **MAX** | **MIN** | **LG** | **LN** | **FLOOR**  **LPAREN**  (expr **COMMA**) *  **RPAREN**
+
+​         -- **ENTITY**
+
+​         -- **ENTITY** **ASSIGN** n_expr
 
 > 源，最小单位。同时构成逻辑闭环。
 
