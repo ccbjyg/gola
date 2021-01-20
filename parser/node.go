@@ -27,16 +27,30 @@ func (n numberNode) Gola() (float64, error) {
 }
 
 //NumberNode 创建数字节点
-// func NumberNode(num operation.Num) Node {
-// 	n, _ := strconv.ParseFloat(num.String(), 64)
-// 	return numberNode{
-// 		value: n,
-// 	}
-// }
 func NumberNode(num token.Value) Node {
 	n, _ := strconv.ParseFloat(string(num), 64)
 	return numberNode{
 		value: n,
+	}
+}
+
+//-----------------------------------------------------------------------------------------------------------
+type entityNode struct {
+	//变量节点，变量节点掌握着另一个node的头部。
+	node Node
+}
+
+func (n entityNode) Debug() string {
+	return "entityNode-> " + n.node.Debug()
+}
+func (n entityNode) Gola() (float64, error) {
+	return n.node.Gola()
+}
+
+//EntityNode 创建数字节点
+func EntityNode(node Node) Node {
+	return entityNode{
+		node: node,
 	}
 }
 

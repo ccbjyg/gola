@@ -45,25 +45,24 @@ func (p *parser) getCurrentToken() token.Token {
 //解析过程可以视为从上至下
 
 func (p *parser) expr() (Node, error) {
-	// expr -- nExpr
-	return p.nExpr()
-}
+	//atom
+	//p.atom = func()....
 
-//+ - 属于二元操作符
-func (p *parser) nExpr() (Node, error) {
-	// nExpr -- hExpr (( PLUS | MINUS ) hExpr ) *
-	return p.binaryOpNode(p.hExpr, nLevel)
-}
+	// ^
+	vh := func() (Node, error) {
+		return p.binaryOpNode(p.atom, vhLevel)
+	}
 
-// * ÷
-func (p *parser) hExpr() (Node, error) {
-	// hExpr -- vhExpr (( PLUS | MINUS ) vhExpr ) *
-	return p.binaryOpNode(p.vhExpr, hLevel)
-}
+	// * ÷
+	h := func() (Node, error) {
+		return p.binaryOpNode(vh, hLevel)
+	}
 
-// ^
-func (p *parser) vhExpr() (Node, error) {
-	return p.binaryOpNode(p.atom, vhLevel)
+	//+ -
+	n := func() (Node, error) {
+		return p.binaryOpNode(h, nLevel)
+	}
+	return n()
 }
 
 //atom 数字源，同时用于构成闭环。
@@ -94,27 +93,27 @@ func (p *parser) atom() (Node, error) {
 		//支持变量
 		entityName := string(t.GetValue()) // 获取变量名
 
-		node, _ := getGlobalEntity(entityName)
-		if node != nil {
-			//说明已经注册过了
-			return node, nil
-		}
-		//否则通过 = 来判断进行注册
-
 		//判断是否为 =
 		t = p.getCurrentToken()
-		if t == nil || t.GetType() != token.ASSIGN {
-			return nil, errors.New(entityName + " miss = symbol")
+		if t != nil && t.GetType() == token.ASSIGN {
+			//如果是 = ，进行赋值
+			node, err := p.expr()
+			if err != nil {
+				return EntityNode(node), err
+			}
+			return EntityNode(node), registerGloblEntity(entityName, node)
 		}
-
-		//解析 node
-		node, err := p.nExpr()
-		if err != nil {
-			return nil, err
+		{
+			//否则先回滚，再查询对应的值是否被定义
+			p.pos--
+			//否则查询对应的
+			node, _ := getGlobalEntity(entityName)
+			if node != nil {
+				//说明已经注册过了
+				return EntityNode(node), nil
+			}
+			return EntityNode(node), errors.New("undefined " + entityName)
 		}
-
-		//注册全局 node
-		return nil, registerGloblEntity(string(entityName), node)
 	} else if op, ok := operation.IsUnaryOp(t); ok {
 		//支持 +++1 ---1
 		node, err := p.atom()
