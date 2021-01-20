@@ -99,9 +99,9 @@ func (p *parser) atom() (Node, error) {
 			//如果是 = ，进行赋值
 			node, err := p.expr()
 			if err != nil {
-				return EntityNode(node), err
+				return VarNode(node), err
 			}
-			return EntityNode(node), registerGloblEntity(entityName, node)
+			return VarNode(node), registerGloblEntity(entityName, node)
 		}
 		{
 			//否则先回滚，再查询对应的值是否被定义
@@ -110,9 +110,9 @@ func (p *parser) atom() (Node, error) {
 			node, _ := getGlobalEntity(entityName)
 			if node != nil {
 				//说明已经注册过了
-				return EntityNode(node), nil
+				return VarNode(node), nil
 			}
-			return EntityNode(node), errors.New("undefined " + entityName)
+			return VarNode(node), errors.New("undefined " + entityName)
 		}
 	} else if op, ok := operation.IsUnaryOp(t); ok {
 		//支持 +++1 ---1
@@ -120,12 +120,12 @@ func (p *parser) atom() (Node, error) {
 		if err != nil {
 			return node, err
 		}
-		return UnaryOpNode(op, node), nil
+		return OperationNode(op, node), nil
 	} else if op, ok := operation.IsBuildInOp(t); ok {
 		//如果是内置函数
 		t = p.getCurrentToken()
 		if t == nil || t.GetType() != token.LPAREN {
-			return BuildInOpNode(op), errors.New("miss ( ")
+			return OperationNode(op), errors.New("miss ( ")
 		}
 
 		nodes := []Node{}
@@ -148,9 +148,9 @@ func (p *parser) atom() (Node, error) {
 
 		t = p.getCurrentToken()
 		if t == nil || t.GetType() != token.RPAREN {
-			return BuildInOpNode(op, nodes...), errors.New("miss ) ")
+			return OperationNode(op, nodes...), errors.New("miss ) ")
 		}
-		return BuildInOpNode(op, nodes...), nil
+		return OperationNode(op, nodes...), nil
 	} else {
 		//都没开始就结束了
 		if t != nil {
@@ -178,10 +178,10 @@ func (p *parser) binaryOpNode(f func() (Node, error), tokenTypes map[token.Type]
 			}
 			rightNode, err := f()
 			if err != nil {
-				return BinOpNode(op, leftNode, rightNode), err
+				return OperationNode(op, leftNode, rightNode), err
 			}
 			//左结合
-			leftNode = BinOpNode(op, leftNode, rightNode)
+			leftNode = OperationNode(op, leftNode, rightNode)
 		} else {
 			//回滚
 			lookup = false

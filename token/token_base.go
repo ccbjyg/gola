@@ -21,9 +21,13 @@ const (
 	//UNKNOWN 未知
 	UNKNOWN Type = iota
 
+	//计划:
+	//基本数据类型: number, string, bool
+	//高级数据类型: arrary, struct, func
+
 	//NUM 整数 小数...
 	NUM
-	//ENTITY 对象
+	//ENTITY 对象 (本意就是指一段 byte数组了 -_-)
 	ENTITY
 
 	//symbol
