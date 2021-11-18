@@ -1,6 +1,6 @@
 package parser
 
-import "github.com/Cc-BJYG/gola/token"
+import "github.com/ccbjyg/gola/token"
 
 var nLevel = map[token.Type]bool{
 	token.PLUS:  true,

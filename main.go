@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Cc-BJYG/gola/parser"
-	"github.com/Cc-BJYG/gola/spliter"
-	"github.com/Cc-BJYG/gola/token"
+	"github.com/ccbjyg/gola/parser"
+	"github.com/ccbjyg/gola/spliter"
+	"github.com/ccbjyg/gola/token"
 )
 
 func main() {

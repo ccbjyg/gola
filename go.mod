@@ -1,3 +1,3 @@
-module github.com/Cc-BJYG/gola
+module github.com/ccbjyg/gola
 
 go 1.15

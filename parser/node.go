@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/Cc-BJYG/gola/operation"
-	"github.com/Cc-BJYG/gola/token"
+	"github.com/ccbjyg/gola/operation"
+	"github.com/ccbjyg/gola/token"
 )
 
 //Node 节点

@@ -2,7 +2,8 @@ package spliter
 
 import (
 	"errors"
-	"github.com/Cc-BJYG/gola/token"
+
+	"github.com/ccbjyg/gola/token"
 )
 
 //Spliter 分词器

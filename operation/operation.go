@@ -3,7 +3,7 @@ package operation
 import (
 	"math"
 
-	"github.com/Cc-BJYG/gola/token"
+	"github.com/ccbjyg/gola/token"
 )
 
 var operationM = map[token.Type]Operation{
